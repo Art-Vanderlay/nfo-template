@@ -4,18 +4,11 @@ import re
 from bs4 import BeautifulSoup
 from requests import get
 import pandas as pd
-from movie_sort_to_df import _save_to_file
+from .common import save_to_file, extensions
 
 
-def get_episodes(
-    imdb_id,
-    start=None,
-    end=None,
-    filepath=None,
-    output_type="csv",
-    from_write_ep=False,
-    from_nfo=False,
-):
+def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
+                  output_type="csv", from_write_ep=False):
     """
     Scrape the data of all the episodes in the given seasons and
     organize into a DataFrame. Default setting will scrape every
@@ -24,9 +17,9 @@ def get_episodes(
     'Air date', 'Description'
 
     Example:
-        1) get_episodes('tt0264235')
-        2) get_episodes('tt0058805', start=1, end=3, filepath='C:\\Users\\user\\Desktop',
-                        output_type='txt')
+        1) make_seriesdb('tt0264235')
+        2) make_seriesdb('tt0058805', start=1, end=3, filepath='home/user/shows',
+                         output_type='txt')
 
     Parameters
     ----------
@@ -37,21 +30,19 @@ def get_episodes(
     end: int
         The last season to scrape.
     filepath: str, optional
-        The output directory for the txt/csv file. Default is current
-        working directory.
+        The output directory for the txt/csv file.
+        Default is home/user.
     output_type: str, default `csv`
         Choose the resulting filetype/output. Valid types are `txt`,
         `csv`, `console`.
     from_write_ep: bool, default False
         Flag to call `_extract_data()` and return DataFrame
         to `write_episode_names()` function.
-    from_nfo: bool, default False
-        Flag to return page_html values to`makenfo()` function.
     """
     if start is None:
         start = 1
     if filepath is None:
-        filepath = os.getcwd()
+        filepath = os.path.expanduser('~')
 
     episodelist = []
     while True:
@@ -79,9 +70,6 @@ def get_episodes(
             soup = BeautifulSoup(response.text, "html.parser")
             episode_details = soup.find_all("section", class_="sc-33cc047c-0 guTCiW")
 
-            if from_nfo:
-                return episode_details
-
             # End loop after reaching final season.
             end_loop = _reach_end_of_season(episode_details, start, end)
             _extract_data(
@@ -91,9 +79,10 @@ def get_episodes(
 
         if end_loop:
             if from_write_ep:
+                # Return episodelist to `rename_episodes()`
                 return episodelist
             # Output a DataFrame to a txt/csv file or print to console.
-            _save_to_file(
+            save_to_file(
                 pd.DataFrame(
                     episodelist,
                     columns=[
@@ -122,7 +111,7 @@ def _reach_end_of_season(episode_details, start, end):
         if start == end:
             endloop = True
         return endloop
-    else:
+    else:  # Default setting to scrape all seasons.
         # Check that no further seasons exist on IMDB.
         for ep in episode_details:
             if ep.find("a", class_="ipc-title-link-wrapper") is None:
@@ -130,15 +119,14 @@ def _reach_end_of_season(episode_details, start, end):
             return endloop
 
 
-def write_episode_names(root_folder_path, imdb_id=None,
-                        csv_path=None, info=None):
+def rename_episodes(root_folder_path, info=None, **kwargs):
     """
     Overwrite the old file names of the show's episodes with the new
-    names scraped from IMDB with `get_episodes`.
+    names scraped from IMDB with `make_seriesdb()`.
     Must be called from the show's root folder and will scan for
     folders with the following naming scheme:
 
-    Series Name (root)
+    <Series Name> (root)
       |
       |-- Season 1
       |-- Season 2
@@ -146,32 +134,40 @@ def write_episode_names(root_folder_path, imdb_id=None,
       |-- (etc.)
 
     Example:
-        write_episode_names("C:\\Users\\user\\Desktop\\curb",
-                            csv_path="C:\\Users\\user\\Desktop\\eps.csv",
-                            info="1080p.x265)
+        rename_episodes("home/user/Some Show",
+                         csv_path=home/user/eps.csv",
+                         info="1080p.x265)
 
     Parameters
     ----------
     root_folder_path: str
         The root directory of the series.
-    imdb_id: str, optional
-        The IMDB id of the show (e.g. 'tt0903747')
-    csv_path: str, optional
-        The csv file containing the series data.
     info: str, optional
         Any additional information about the file.
+    **kwargs : dict, optional
+        Arbitrary keyword arguments.
+        - imdb_id: str, optional
+            The IMDB id of the show (e.g. 'tt0903747'). If passed,
+            will rename the episodes with the names scraped from
+            IMDB.
+        - csv_path: str, optional
+            The csv file containing the series data. If passed,
+            will rename the episodes from the input csv file.
+    Raises
+    ------
+    ValueError
+        If neither 'imdb_id' nor 'csv_path' is provided in the keyword arguments.
     """
     if info is not None:
         info = " - " + info
     else:
         info = ""
 
-    if csv_path is not None:
-        if csv_path.endswith(".csv"):
-            df = pd.read_csv(csv_path)
+    if 'csv_path' in kwargs:
+        if kwargs['csv_path'].endswith(".csv"):
+            df = pd.read_csv(kwargs['csv_path'])
         else:
-            raise ValueError(f"{os.path.basename(csv_path)} must be a csv file.")
-
+            raise ValueError(f"{os.path.basename(kwargs['csv_path'])} must be a csv file.")
         # Ensure the CSV file has the required columns.
         if not all(
             col in df.columns
@@ -181,20 +177,22 @@ def write_episode_names(root_folder_path, imdb_id=None,
                 "CSV file columns do not match pattern 'Season', "
                 "'Episode Number', 'Title', 'Air date', 'Description'. Is it the correct file?"
             )
-
-    else:
+    elif 'imdb_id' in kwargs:
         df = pd.DataFrame(
-            get_episodes(imdb_id, from_write_ep=True),
+            make_seriesdb(kwargs['imdb_id'], from_write_ep=True),
             columns=["Season", "Episode Number", "Title"],
         )
+    else:
+        raise ValueError("At least one of 'imdb_id' or 'csv_path' must be provided.")
 
-    def _rename_files(file_name, ext):
+    def _rename_files(file_name):
         # Helper function.
         for old_name, (_, row) in zip(file_name, group.iterrows()):
             episode_name = "".join(c for c in row["Title"] if c not in r'\/:*?"<>|')
             episode_num = row["Episode Number"]
+            file_ext = os.path.splitext(old_name)[1]
             new_name = (
-                f"S{season:02d}E{int(episode_num):02d} - {episode_name}{info}.{ext}"
+                f"S{season:02d}E{int(episode_num):02d} - {episode_name}{info}{file_ext}"
             )
             old_file_path = os.path.join(season_folder, old_name)
             new_file_path = os.path.join(season_folder, new_name)
@@ -205,22 +203,18 @@ def write_episode_names(root_folder_path, imdb_id=None,
     grouped = df.groupby("Season")
     for season, group in grouped:
         # Look for folders titled 'Season X'. Change depending on naming scheme.
+        # TODO add way of handling other naming schemes.
         season_folder = os.path.join(root_folder_path, f"Season {season}")
-
         if not os.path.exists(season_folder):
             print(f"Season folder {season_folder} does not exist. Skipping...")
             continue
 
-        # The keys in this dict are named after the file types because they
-        # are passed as the file extensions in the `_rename_files(v, k)` function call.
+        # Loop through the folder and add each file name to the lists.
+        # Separate lists for video files and sub files.
         files = {
-            "mp4": [f for f in os.listdir(season_folder) if f.endswith(".mp4")],
-            "mkv": [f for f in os.listdir(season_folder) if f.endswith(".mkv")],
-            "avi": [f for f in os.listdir(season_folder) if f.endswith(".avi")],
-            "srt": [f for f in os.listdir(season_folder) if f.endswith(".srt")],
-            "nfo": [f for f in os.listdir(season_folder) if f.endswith(".vtt")],
+            "video": [f for f in os.listdir(season_folder) if f.endswith(extensions)],
+            "subs": [f for f in os.listdir(season_folder) if f.endswith((".srt", ".vtt"))]
         }
-
         ep_num = max(files, key=lambda k: len(files[k]))
         if len(files[ep_num]) != len(group):
             print(
@@ -229,8 +223,8 @@ def write_episode_names(root_folder_path, imdb_id=None,
             )
             continue
 
-        for k, v in files.items():
-            _rename_files(v, k)
+        for v in files.values():
+            _rename_files(v)
 
 
 def _extract_data(episode_details, episodelist,

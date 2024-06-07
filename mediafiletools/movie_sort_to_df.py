@@ -3,39 +3,29 @@ import re
 from string import ascii_uppercase
 
 import pandas as pd
-
-extensions = ('.mp4', '.mkv', '.avi', 'ts', 'mov', '.wmv', '.flv', '.webm',
-              '.m4v', '.mpg', '.3gp', '.3g2', '.ogv', '.vob', '.rm', '.rmvb',
-              '.asf', '.m2ts', '.mxf', '.divx', '.xvid', '.f4v', '.mpe',
-              '.mpe', '.drc', '.qt', '.svi', '.bik')
+from .common import save_to_file, extensions
 
 
-def sortmovies(
-    dir_path,
-    filepath=None,
-    sorted_movies=None,
-    sort_type="abc",
-    output_type="csv",
-    strip=False,
-):
+def make_moviedb(dir_path, filepath=None, sort_type="abc",
+                 output_type="csv", strip=False):
     """
-    Main sorting function. `abc` sort sorts every file in alphabetical
-    order. `folder`sort` sorts every file by directory and keeps the
+    Create movie database from every movie file in the directory.
+
+    `abc` sort sorts every file in alphabetical order.
+    `folder`sort` sorts every file by directory and keeps the
     directory structure intact. The output file is created in the
-    current working directory by default.
+    Desktop directory by default.
 
     Example:
-        sort_movies('D:\\Movies', sort_type='folder', output_type='csv', strip=True)
+        make_moviedb('/home/user/movies', sort_type='folder', output_type='csv', strip=True)
 
     Parameters
     ----------
     dir_path: str
         The root directory of the movie files.
     filepath: str, optional
-        The output directory for the txt/csv file. Default is current
-        working directory.
-    sorted_movies: list, default None
-        A list of every movie title found in the directory tree.
+        The output directory for the txt/csv file. Default is
+        /home/user.
     sort_type: str, default `abc`
         The two types of sort algorithms, `abc` and `folder`.
         `abc` sort produces an alphabetically sorted dataframe
@@ -47,17 +37,16 @@ def sortmovies(
         Choose the resulting filetype/output. Valid types are `txt`,
         `csv`, `console`.
     strip: bool, default False
-        Call `_format_filename` with the `strip_all` kwarg
+        Call `_format_filename()` with the `strip_all` kwarg
         to remove extraneous details from the file names.
     """
     if filepath is None:
-        filepath = os.getcwd()
-    if sorted_movies is None:
-        sorted_movies = []
+        filepath = os.path.expanduser('~')
+    sorted_movies = []
 
     if sort_type == "abc":
         for root, dirs, files in os.walk(dir_path):
-            sorted_movies.extend(_main_sort(root, strip=strip))
+            sorted_movies.extend(recursive_sort(root, strip=strip))
             del dirs[:]
         _create_abc_df(sorted_movies, filepath=filepath, output_type=output_type)
 
@@ -71,10 +60,10 @@ def sortmovies(
                     files[i] = _format_filename(files[i], strip_all=strip)
                 uncategorized = ("Uncategorized", files)
             else:
-                # Send each movie folder to `make_list()` to be
+                # Send each movie folder to `recursive_sort()` to be
                 # put in their own separate list.
                 sorted_movies.append(
-                    (os.path.basename(root), _main_sort(root, strip=strip))
+                    (os.path.basename(root), recursive_sort(root, strip=strip))
                 )
                 del dirs[:]
         # Sort list of tuples ignoring case and append the
@@ -99,7 +88,7 @@ def sortmovies(
         )
 
 
-def _main_sort(dir_path, movie_list=None, strip=False):
+def recursive_sort(dir_path, movie_list=None, strip=False):
     """
     Recursively sorts every file in the `dir_path` tree.
 
@@ -122,7 +111,7 @@ def _main_sort(dir_path, movie_list=None, strip=False):
         if os.path.isfile(item_path) and item.endswith(extensions):
             movie_list.append(_format_filename(item, strip_all=strip))
         elif os.path.isdir(item_path):
-            _main_sort(item_path, movie_list, strip=strip)
+            recursive_sort(item_path, movie_list, strip=strip)
     return movie_list
 
 
@@ -159,12 +148,12 @@ def _create_abc_df(data, filepath=None, output_type=None):
 
     Parameters
     ----------
-    data: list of str
+    data: list
         A list of every movie title.
     filepath: str, optional
         The directory path for the output csv file.
-        Defaults to current working directory.
-    output_type: str, default `txt`
+        Default is /home/user.
+    output_type: str, default `csv`
         Choose the resulting filetype/output. Valid types are `txt`,
         `csv`, `console`.
     """
@@ -181,11 +170,11 @@ def _create_abc_df(data, filepath=None, output_type=None):
                     first = False
                 else:
                     rows.append(("", m))
-    _save_to_file(
+    save_to_file(
         pd.DataFrame(rows, columns=["A - Z", "Movie"]),
         filepath=filepath,
         output_type=output_type,
-        fname="Movie Database",
+        fname="Movie Database A - Z",
     )
 
 
@@ -199,8 +188,8 @@ def _create_folder_df(data, filepath=None, output_type=None, strip=False):
         A list of every movie title.
     filepath: str, optional
         The directory path for the output csv file.
-        Defaults to current working directory.
-    output_type: str, default `txt`
+        Default is /home/user.
+    output_type: str, default `scv`
         Choose the resulting filetype/output. Valid types are `txt`,
         `csv`, `console`.
     strip: bool, default False
@@ -218,56 +207,9 @@ def _create_folder_df(data, filepath=None, output_type=None, strip=False):
                 first = False
             else:
                 rows.append(("", m))
-    _save_to_file(
+    save_to_file(
         pd.DataFrame(rows, columns=["Series", "Movie"]),
         filepath=filepath,
         output_type=output_type,
         fname="Movie Database",
     )
-
-
-def _save_to_file(df, filepath=None, output_type=None, fname=None):
-    """
-    Helper function to save the resulting DataFrame to
-    a file or to print to console.
-
-    Parameters
-    ----------
-    df: DataFrame
-        The resulting DataFrame of the movie database.
-    filepath: str, optional
-        The directory path for the output csv file.
-        Defaults to current working directory.
-    output_type: str, default `txt`
-        Choose the resulting filetype/output. Valid types are `txt`,
-        `csv`, `console`.
-    """
-    if output_type == "txt":
-        if is_file(filepath):
-            fpath = filepath
-        else:
-            fpath = os.path.join(filepath, fname + ".txt")
-        with open(fpath, "w", encoding="utf-8") as txt:
-            df.to_string(txt, index=False)
-    elif output_type == "csv":
-        if is_file(filepath):
-            df.to_csv(filepath, index=False)
-        else:
-            df.to_csv(os.path.join(filepath, fname + ".csv"), index=False)
-    elif output_type == "console":
-        print(df.to_string())
-    else:
-        raise ValueError(
-            f"{output_type} is not a valid output type. Valid "
-            f"keywords are 'txt', 'csv' or 'console'."
-        )
-
-
-def is_file(filepath):
-    # Check if the path has a file extension
-    _, ext = os.path.splitext(filepath)
-    if ext:
-        # Check if the parent directory exists
-        parent_dir = os.path.dirname(filepath)
-        return os.path.isdir(parent_dir)
-    return False

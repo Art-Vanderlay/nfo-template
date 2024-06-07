@@ -1,0 +1,15 @@
+include tests\expected_files\blank_episode_names.csv
+include tests\expected_files\expected_abc_strip.csv
+include tests\expected_files\expected_abc_strip.txt
+include tests\expected_files\expected_abcsort.csv
+include tests\expected_files\expected_abcsort.txt
+include tests\expected_files\expected_folder_sort.csv
+include tests\expected_files\expected_folder_sort.txt
+include tests\expected_files\expected_folder_strip.csv
+include tests\expected_files\expected_folder_strip.txt
+include tests\expected_files\expected_ge_default.csv
+include tests\expected_files\expected_ge_default.txt
+include tests\expected_files\expected_ge_start_end.csv
+include tests\expected_files\expected_ge_start_end.txt
+include tests\expected_files\expected_list_default.txt
+include tests\expected_files\expected_list_with_info.txt
