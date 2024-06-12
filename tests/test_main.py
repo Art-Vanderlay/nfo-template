@@ -1,6 +1,5 @@
 import pandas as pd
 import os
-import filecmp
 import pytest
 import shutil
 from mediafiletools.series_details import make_seriesdb, rename_episodes
@@ -200,6 +199,7 @@ def test_write_episode_names_from_imdb(request, expected_files_dir):
     # Reset the filenames.
     blank_csv_file_path = os.path.join(expected_files_dir, "blank_episode_names.csv")
     rename_episodes(episodes_dir, csv_path=blank_csv_file_path)
+
 
 def test_movies_dataframe_default(request, expected_files_dir):
     # Get the path to the current test module
