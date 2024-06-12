@@ -47,7 +47,7 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
     episodelist = []
     while True:
         season_url = rf"https://www.imdb.com/title/{imdb_id}/episodes/?season={start}"
-        season = int(season_url[-1])
+        season = int(start)
         response = get(
             season_url,
             headers={
@@ -95,7 +95,7 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
                 ),
                 filepath=filepath,
                 output_type=output_type,
-                fname="Episode Database",
+                fname=soup.find('h2').text.strip(),
             )
             break
 
