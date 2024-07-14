@@ -4,7 +4,7 @@ import re
 from bs4 import BeautifulSoup
 from requests import get
 import pandas as pd
-from .common import save_to_file, extensions
+from .common import save_to_file, EXTENSIONS
 
 
 def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
@@ -18,8 +18,8 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
 
     Example:
         1) make_seriesdb('tt0264235')
-        2) make_seriesdb('tt0058805', start=1, end=3, filepath='home/user/shows',
-                         output_type='txt')
+        2) make_seriesdb('tt0058805', start=1, end=3,
+                         filepath='home/user/shows', output_type='txt')
 
     Parameters
     ----------
@@ -212,8 +212,8 @@ def rename_episodes(root_folder_path, info=None, **kwargs):
         # Loop through the folder and add each file name to the lists.
         # Separate lists for video files and sub files.
         files = {
-            "video": [f for f in os.listdir(season_folder) if f.endswith(extensions)],
-            "subs": [f for f in os.listdir(season_folder) if f.endswith((".srt", ".vtt"))]
+            "video": [f for f in os.listdir(season_folder) if f.lower().endswith(EXTENSIONS)],
+            "subs": [f for f in os.listdir(season_folder) if f.lower().endswith((".srt", ".vtt"))]
         }
         ep_num = max(files, key=lambda k: len(files[k]))
         if len(files[ep_num]) != len(group):

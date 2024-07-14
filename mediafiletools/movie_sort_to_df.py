@@ -3,7 +3,7 @@ import re
 from string import ascii_uppercase
 
 import pandas as pd
-from .common import save_to_file, extensions
+from .common import save_to_file, EXTENSIONS
 
 
 def make_moviedb(dir_path, filepath=None, sort_type="abc",
@@ -14,10 +14,11 @@ def make_moviedb(dir_path, filepath=None, sort_type="abc",
     `abc` sort sorts every file in alphabetical order.
     `folder`sort` sorts every file by directory and keeps the
     directory structure intact. The output file is created in the
-    Desktop directory by default.
+    Home directory by default.
 
     Example:
-        make_moviedb('/home/user/movies', sort_type='folder', output_type='csv', strip=True)
+        make_moviedb('/home/user/movies', sort_type='folder',
+                     output_type='csv', strip=True)
 
     Parameters
     ----------
@@ -108,7 +109,7 @@ def recursive_sort(dir_path, movie_list=None, strip=False):
     files_and_dirs.sort(key=lambda x: (not os.path.isdir(os.path.join(dir_path, x)), x))
     for item in files_and_dirs:
         item_path = os.path.join(dir_path, item)
-        if os.path.isfile(item_path) and item.endswith(extensions):
+        if os.path.isfile(item_path) and item.lower().endswith(EXTENSIONS):
             movie_list.append(_format_filename(item, strip_all=strip))
         elif os.path.isdir(item_path):
             recursive_sort(item_path, movie_list, strip=strip)
@@ -128,7 +129,7 @@ def _format_filename(filename, strip_all=False):
     """
     if filename[0].islower():
         filename = filename.capitalize()
-    if filename.endswith(extensions):
+    if filename.lower().endswith(EXTENSIONS):
         if strip_all:
             # Ignore files with year at the beginning of the filename.
             match = re.search(r"^\d{4}", filename)
