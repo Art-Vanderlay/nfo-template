@@ -21,6 +21,7 @@ setup(
         'pandas',
         'requests',
         'beautifulsoup4',
+        'tabulate',
     ],
     test_suite='tests',
 )

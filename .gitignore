@@ -1,0 +1,9 @@
+log/
+.idea/
+build/
+dist/
+media_file_tools.egg-info/
+mediafiletools/__pycache__/
+tests/__pycache__/
+tests/actual_dupe_files/
+tests/actual_files/

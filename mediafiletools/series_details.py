@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 
@@ -5,6 +6,15 @@ from bs4 import BeautifulSoup
 from requests import get
 import pandas as pd
 from .common import save_to_file, EXTENSIONS
+
+
+# Keep log of results of `rename_episodes`.
+log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'log')
+os.makedirs(log_dir, exist_ok=True)
+
+log_file = os.path.join(log_dir, 'rename.log')
+logging.basicConfig(filename=log_file, level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
@@ -135,8 +145,8 @@ def rename_episodes(root_folder_path, info=None, **kwargs):
 
     Example:
         rename_episodes("home/user/Some Show",
-                         csv_path=home/user/eps.csv",
-                         info="1080p.x265)
+                         csv_path="home/user/eps.csv",
+                         info="1080p.x265")
 
     Parameters
     ----------
@@ -196,8 +206,14 @@ def rename_episodes(root_folder_path, info=None, **kwargs):
             )
             old_file_path = os.path.join(season_folder, old_name)
             new_file_path = os.path.join(season_folder, new_name)
-            os.rename(old_file_path, new_file_path)
-            print(f"Renamed: {old_name} -> {new_name}")
+
+            try:
+                os.rename(old_file_path, new_file_path)
+                logging.info(f"Renamed: {old_name} -> {new_name}")
+                print(f"Renamed: {old_name} -> {new_name}")
+            except Exception as e:
+                logging.error(f"Error renaming {old_name}: {str(e)}")
+                print(f"Error renaming {old_name}: {str(e)}")
 
     # Group the data by season
     grouped = df.groupby("Season")

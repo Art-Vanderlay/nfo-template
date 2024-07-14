@@ -1,4 +1,6 @@
 import os
+from tabulate import tabulate
+
 
 EXTENSIONS = ('.mp4', '.mkv', '.avi', 'ts', 'mov', '.wmv', '.flv', '.webm',
               '.m4v', '.mpg', '.3gp', '.3g2', '.ogv', '.vob', '.rm', '.rmvb',
@@ -29,20 +31,30 @@ def save_to_file(df, filepath=None, output_type=None, fname=None):
             fpath = filepath
         else:
             fpath = os.path.join(filepath, fname + ".txt")
+        # Convert the dataframe to a left-aligned table string using tabulate
+        table_str = _tabulate_df(df)
         with open(fpath, "w", encoding="utf-8") as txt:
-            df.to_string(txt, index=False)
+            txt.write(table_str)
     elif output_type == "csv":
         if is_file(filepath):
             df.to_csv(filepath, index=False)
         else:
             df.to_csv(os.path.join(filepath, fname + ".csv"), index=False)
     elif output_type == "console":
-        print(df.to_string())
+        table_str = _tabulate_df(df)
+        print(table_str)
     else:
         raise ValueError(
             f"{output_type} is not a valid output type. Valid "
             f"keywords are 'txt', 'csv' or 'console'."
         )
+
+
+def _tabulate_df(df):
+    table_str = tabulate(df, headers='keys', tablefmt='plain', stralign='left',
+                         numalign='left', showindex=False)
+    # Add a space before each item for readability
+    return '\n'.join(' ' + line for line in table_str.split('\n'))
 
 
 def is_file(filepath):
