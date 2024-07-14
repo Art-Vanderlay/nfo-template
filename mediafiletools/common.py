@@ -1,6 +1,6 @@
 import os
 
-extensions = ('.mp4', '.mkv', '.avi', 'ts', 'mov', '.wmv', '.flv', '.webm',
+EXTENSIONS = ('.mp4', '.mkv', '.avi', 'ts', 'mov', '.wmv', '.flv', '.webm',
               '.m4v', '.mpg', '.3gp', '.3g2', '.ogv', '.vob', '.rm', '.rmvb',
               '.asf', '.m2ts', '.mxf', '.divx', '.xvid', '.f4v', '.mpe',
               '.mpe', '.drc', '.qt', '.svi', '.bik')
