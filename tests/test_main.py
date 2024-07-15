@@ -4,6 +4,7 @@ import pytest
 import shutil
 from mediafiletools.series_details import make_seriesdb, rename_episodes
 from mediafiletools.movie_sort_to_df import make_moviedb
+from mediafiletools.find_music_dupes import find_music_dupes
 
 
 @pytest.fixture
@@ -179,7 +180,7 @@ def test_write_episode_names(request, expected_files_dir):
         dir_path = os.path.join(episodes_dir, directory)
         actual_filenames = os.listdir(dir_path)
         assert sorted(actual_filenames) == sorted(expected_names)[index]
-        
+
     # Reset the filenames.
     blank_csv_file_path = os.path.join(expected_files_dir,
                                        "blank_episode_names.csv")
@@ -215,7 +216,7 @@ def test_write_episode_names_from_imdb(request, expected_files_dir):
         dir_path = os.path.join(episodes_dir, directory)
         actual_filenames = os.listdir(dir_path)
         assert sorted(actual_filenames) == sorted(expected_names)[index]
-    
+
     # Reset the filenames.
     blank_csv_file_path = os.path.join(expected_files_dir,
                                        "blank_episode_names.csv")
@@ -312,9 +313,11 @@ def test_movies_dataframe_strip(request, expected_files_dir):
 
     # Compare csv files.
     df1 = pd.read_csv(actual_abc_strip_csv)
-    df2 = pd.read_csv(os.path.join(expected_files_dir, "expected_abc_strip.csv"))
+    df2 = pd.read_csv(os.path.join(expected_files_dir,
+                                   "expected_abc_strip.csv"))
     df3 = pd.read_csv(actual_folder_strip_csv)
-    df4 = pd.read_csv(os.path.join(expected_files_dir, "expected_folder_strip.csv"))
+    df4 = pd.read_csv(os.path.join(expected_files_dir,
+                                   "expected_folder_strip.csv"))
 
     # Normalize newlines
     actual_abc_txt_content = normalize_newlines(actual_abc_strip_txt)
@@ -326,3 +329,131 @@ def test_movies_dataframe_strip(request, expected_files_dir):
     assert df3.to_dict() == df4.to_dict()
     assert actual_abc_txt_content == expected_abc_txt_content
     assert actual_folder_txt_content == expected_folder_txt_content
+
+
+@pytest.fixture
+def expected_dupe_files_dir(tmp_path):
+    # Create temporary directory for expected files
+    expected_dupe_files_dir = tmp_path / 'expected_dupe_files'
+    expected_dupe_files_dir.mkdir()
+
+    # Copy expected files to temporary directory
+    expected_dupe_files = [
+        'expected_default.csv',
+        'expected_default.txt',
+        'expected_flac.txt',
+        'expected_flac.csv',
+        'expected_mp3.txt',
+        'expected_mp3.csv',
+        'expected_wav.txt',
+        'expected_wav.csv',
+    ]
+
+    for fname in expected_dupe_files:
+        shutil.copy(os.path.join('tests', 'expected_dupe_files',
+                                 fname), expected_dupe_files_dir / fname)
+    return expected_dupe_files_dir
+
+
+def test_music_dupe_default(request, expected_dupe_files_dir):
+    actual_dupe_dir, musicdir = path_to_test_module(request,
+                                                    'actual_dupe_files',
+                                                    'dummy_music')
+
+    actual_default_csv = os.path.join(actual_dupe_dir, "actual_default.csv")
+    actual_default_txt = os.path.join(actual_dupe_dir, "actual_default.txt")
+    expected_default_txt = expected_dupe_files_dir / "expected_default.txt"
+
+    find_music_dupes(musicdir,
+                     filepath=str(actual_default_csv),
+                     output_type='csv')
+    find_music_dupes(musicdir,
+                     filepath=str(actual_default_txt),
+                     output_type='txt')
+
+    compare_and_test_all(actual_default_csv,
+                         expected_dupe_files_dir,
+                         "expected_default.csv",
+                         actual_default_txt,
+                         expected_default_txt)
+
+    compare_and_test_all(actual_default_csv,
+                         expected_dupe_files_dir,
+                         "expected_default.csv",
+                         actual_default_txt,
+                         expected_default_txt)
+
+
+def test_music_dupe_wav(request, expected_dupe_files_dir):
+    actual_dupe_dir, musicdir = path_to_test_module(request,
+                                                    'actual_dupe_files',
+                                                    'dummy_music')
+
+    actual_wav_csv = os.path.join(actual_dupe_dir, "actual_wav.csv")
+    actual_wav_txt = os.path.join(actual_dupe_dir, "actual_wav.txt")
+    expected_wav_txt = expected_dupe_files_dir / "expected_wav.txt"
+
+    find_music_dupes(musicdir,
+                     filter='wav',
+                     filepath=str(actual_wav_csv),
+                     output_type='csv')
+    find_music_dupes(musicdir,
+                     filter='wav',
+                     filepath=str(actual_wav_txt),
+                     output_type='txt')
+
+    compare_and_test_all(actual_wav_csv,
+                         expected_dupe_files_dir,
+                         "expected_wav.csv",
+                         actual_wav_txt,
+                         expected_wav_txt)
+
+
+def test_music_dupe_mp3(request, expected_dupe_files_dir):
+    actual_dupe_dir, musicdir = path_to_test_module(request,
+                                                    'actual_dupe_files',
+                                                    'dummy_music')
+
+    actual_mp3_csv = os.path.join(actual_dupe_dir, "actual_mp3.csv")
+    actual_mp3_txt = os.path.join(actual_dupe_dir, "actual_mp3.txt")
+    expected_mp3_txt = expected_dupe_files_dir / "expected_mp3.txt"
+
+    find_music_dupes(musicdir,
+                     filter='mp3',
+                     filepath=str(actual_mp3_csv),
+                     output_type='csv')
+    find_music_dupes(musicdir,
+                     filter='mp3',
+                     filepath=str(actual_mp3_txt),
+                     output_type='txt')
+
+    compare_and_test_all(actual_mp3_csv,
+                         expected_dupe_files_dir,
+                         "expected_mp3.csv",
+                         actual_mp3_txt,
+                         expected_mp3_txt)
+
+
+def test_music_dupe_flac(request, expected_dupe_files_dir):
+    actual_dupe_dir, musicdir = path_to_test_module(request,
+                                                    'actual_dupe_files',
+                                                    'dummy_music')
+
+    actual_flac_csv = os.path.join(actual_dupe_dir, "actual_flac.csv")
+    actual_flac_txt = os.path.join(actual_dupe_dir, "actual_flac.txt")
+    expected_flac_txt = expected_dupe_files_dir / "expected_flac.txt"
+
+    find_music_dupes(musicdir,
+                     filter='flac',
+                     filepath=str(actual_flac_csv),
+                     output_type='csv')
+    find_music_dupes(musicdir,
+                     filter='flac',
+                     filepath=str(actual_flac_txt),
+                     output_type='txt')
+
+    compare_and_test_all(actual_flac_csv,
+                         expected_dupe_files_dir,
+                         "expected_flac.csv",
+                         actual_flac_txt,
+                         expected_flac_txt)

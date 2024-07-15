@@ -1,0 +1,14 @@
+Song,File Location
+,
+copy of perfect-match-mp3.mp3,C:\Users\causa\media-file-tools\tests\dummy_music
+01. perfect-match-mp3.mp3,C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-mp3
+perfect-match-mp3.mp3,C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-mp3
+test 2 - perfect-match-mp3.mp3,C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-mp3
+,
+copy of title-artist-tag-match.mp3,C:\Users\causa\media-file-tools\tests\dummy_music
+01. title-artist-tag-match.mp3,C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-mp3
+test 1 - title-artist-tag-match.mp3,C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-mp3
+title-artist-tag-match.mp3,C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-mp3
+,
+song with no tags.mp3,C:\Users\causa\media-file-tools\tests\dummy_music\no-tags
+fake artist - song with no tags.mp3,C:\Users\causa\media-file-tools\tests\dummy_music\no-tags

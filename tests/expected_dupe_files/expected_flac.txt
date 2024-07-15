@@ -1,0 +1,11 @@
+ Song                                               File Location
+ 
+ 05. perfect-match-flac.flac                        C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-flac
+ perfect-match-flac.flac                            C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-flac
+ test 2 - perfect-match-flac.flac                   C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-flac
+ copy of perfect-match-flac.flac                    C:\Users\causa\media-file-tools\tests\dummy_music
+ 
+ 01. title-artist-tag-match-flac.flac               C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-flac
+ test 1 - title-artist-tag-match-flac.flac          C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-flac
+ title-artist-tag-match-flac.flac                   C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-flac
+ copy of test 4 - title-artist-tag-match-flac.flac  C:\Users\causa\media-file-tools\tests\dummy_music

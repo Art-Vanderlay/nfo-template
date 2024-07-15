@@ -7,6 +7,9 @@ EXTENSIONS = ('.mp4', '.mkv', '.avi', 'ts', 'mov', '.wmv', '.flv', '.webm',
               '.asf', '.m2ts', '.mxf', '.divx', '.xvid', '.f4v', '.mpe',
               '.mpe', '.drc', '.qt', '.svi', '.bik')
 
+# TODO only wav, flac and mp3 covered in tests
+MUSIC_FORMAT = ('wav', 'flac', 'alac', 'AIFF', 'ogg', 'mp3', 'wma', 'm4a', 'AAC')
+
 
 def save_to_file(df, filepath=None, output_type=None, fname=None):
     """

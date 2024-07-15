@@ -1,0 +1,6 @@
+ Song                           File Location
+ 
+ random title-artist-tag.wav    C:\Users\causa\media-file-tools\tests\dummy_music
+ 06 - title artist tag.wav      C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-wav
+ test 1 - title artist tag.wav  C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-wav
+ title-artist-tag.wav           C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-wav

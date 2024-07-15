@@ -1,0 +1,29 @@
+ Song                                               File Location
+ 
+ copy of perfect-match-mp3.mp3                      C:\Users\causa\media-file-tools\tests\dummy_music
+ 05. perfect-match-flac.flac                        C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-flac
+ perfect-match-flac.flac                            C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-flac
+ test 2 - perfect-match-flac.flac                   C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-flac
+ 01. perfect-match-mp3.mp3                          C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-mp3
+ perfect-match-mp3.mp3                              C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-mp3
+ test 2 - perfect-match-mp3.mp3                     C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-mp3
+ copy of perfect-match-flac.flac                    C:\Users\causa\media-file-tools\tests\dummy_music
+ 
+ copy of title-artist-tag-match.mp3                 C:\Users\causa\media-file-tools\tests\dummy_music
+ random title-artist-tag.wav                        C:\Users\causa\media-file-tools\tests\dummy_music
+ 01. title-artist-tag-match-flac.flac               C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-flac
+ test 1 - title-artist-tag-match-flac.flac          C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-flac
+ title-artist-tag-match-flac.flac                   C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-flac
+ 01. title-artist-tag-match.mp3                     C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-mp3
+ test 1 - title-artist-tag-match.mp3                C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-mp3
+ title-artist-tag-match.mp3                         C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-mp3
+ 06 - title artist tag.wav                          C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-wav
+ test 1 - title artist tag.wav                      C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-wav
+ title-artist-tag.wav                               C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-wav
+ copy of test 4 - title-artist-tag-match-flac.flac  C:\Users\causa\media-file-tools\tests\dummy_music
+ 
+ song with no tags.mp3                              C:\Users\causa\media-file-tools\tests\dummy_music\no-tags
+ 05. song with no tags.flac                         C:\Users\causa\media-file-tools\tests\dummy_music\no-tags
+ 
+ song with no tags.mp3                              C:\Users\causa\media-file-tools\tests\dummy_music\no-tags
+ fake artist - song with no tags.mp3                C:\Users\causa\media-file-tools\tests\dummy_music\no-tags

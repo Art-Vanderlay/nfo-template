@@ -10,6 +10,13 @@ __all__ = [
     "_extract_data",
     "save_to_file",
     "is_file",
+    "find_music_dupes",
+    "get_songs",
+    "_create_dataframe",
+    "_mark_matched_songs",
+    "_fill_df",
+    "_calculate_score",
+    "_check_artist_match",
 ]
 
 from mediafiletools.movie_sort_to_df import (
@@ -24,5 +31,14 @@ from mediafiletools.series_details import (
     _reach_end_of_season,
     rename_episodes,
     _extract_data,
+)
+from mediafiletools.find_music_dupes import (
+    find_music_dupes,
+    get_songs,
+    _create_dataframe,
+    _mark_matched_songs,
+    _fill_df,
+    _calculate_score,
+    _check_artist_match,
 )
 from mediafiletools.common import save_to_file, is_file
