@@ -78,7 +78,8 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
             )
         else:
             soup = BeautifulSoup(response.text, "html.parser")
-            episode_details = soup.find_all("section", class_="sc-33cc047c-0 guTCiW")
+            episode_details = soup.find_all("section",
+                                            class_=re.compile("sc-33cc047c-0.*"))
 
             # End loop after reaching final season.
             end_loop = _reach_end_of_season(episode_details, start, end)
@@ -257,7 +258,7 @@ def _extract_data(episode_details, episodelist,
             episode_data = [season, ep_str, title_str]
             if not from_write_ep:
                 # If called explicitly, also get all details about episodes.
-                airdate = eps.find_all("span", class_="sc-ccd6e31b-10 fVspdm")
+                airdate = eps.find_all("span", class_=re.compile("sc-ccd6e31b-10.*"))
                 descr = eps.find_all("div", class_="ipc-html-content-inner-div")
                 airdate_str = re.search(
                     r"\b\w{3}, \w{3} \d{1,2}, \d{4}\b", str(airdate)
