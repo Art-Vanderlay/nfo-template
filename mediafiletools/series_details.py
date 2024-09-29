@@ -78,8 +78,7 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
             )
         else:
             soup = BeautifulSoup(response.text, "html.parser")
-            episode_details = soup.find_all("section",
-                                            class_=re.compile("sc-33cc047c-0.*"))
+            episode_details = soup.find_all("section", class_=re.compile("sc-e55007c4-0.*"))
 
             # End loop after reaching final season.
             end_loop = _reach_end_of_season(episode_details, start, end)
