@@ -1,0 +1,49 @@
+ Song                                                                                              File Location
+ 
+ copy of perfect-match-mp3.mp3                                                                     C:\Users\causa\media-file-tools\tests\dummy_music
+ 05. perfect-match-flac.flac                                                                       C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-flac
+ perfect-match-flac.flac                                                                           C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-flac
+ test 2 - perfect-match-flac.flac                                                                  C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-flac
+ 01. perfect-match-mp3.mp3                                                                         C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-mp3
+ perfect-match-mp3.mp3                                                                             C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-mp3
+ test 2 - perfect-match-mp3.mp3                                                                    C:\Users\causa\media-file-tools\tests\dummy_music\perfect-match-mp3
+ title-artist-tag-match-flac.flac                                                                  C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-flac
+ copy of perfect-match-flac.flac                                                                   C:\Users\causa\media-file-tools\tests\dummy_music
+ 
+ copy of title-artist-tag-match.mp3                                                                C:\Users\causa\media-file-tools\tests\dummy_music
+ random title-artist-tag.wav                                                                       C:\Users\causa\media-file-tools\tests\dummy_music
+ 01. title-artist-tag-match-flac.flac                                                              C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-flac
+ test 1 - title-artist-tag-match-flac.flac                                                         C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-flac
+ title-artist-tag-match-flac.flac                                                                  C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-flac
+ 01. title-artist-tag-match.mp3                                                                    C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-mp3
+ test 1 - title-artist-tag-match.mp3                                                               C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-mp3
+ title-artist-tag-match.mp3                                                                        C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-mp3
+ 06 - title artist tag.wav                                                                         C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-wav
+ test 1 - title artist tag.wav                                                                     C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-wav
+ title-artist-tag.wav                                                                              C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-wav
+ copy of test 4 - title-artist-tag-match-flac.flac                                                 C:\Users\causa\media-file-tools\tests\dummy_music
+ 
+ 01. Gypsy Woman (She's Homeless) (La Da Dee La Da Da) (Strip To The Bone Edit).mp3                C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+ 01. Gypsy Woman - She's Homeless (La Da De La De Da) (Strip To The Bone Remix).mp3                C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+ 01. Gypsy Woman (She's Homeless) (La Da Dee La Da Da) (Basement Boy 'Strip To The Bone' Mix).mp3  C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+ 
+ 02. Silence (Niels van Gogh vs Thomas Gold Remix).mp3                                             C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+ 02. Silence (Niels van Gogh vs Thomas Gold Radio Edit).mp3                                        C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+ 
+ 03. Rhiannon - Live, 1976 Midnight Special.mp3                                                    C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+ 03. Rhiannon (Live 1976 Midnight Special).mp3                                                     C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+ 
+ 04. Neuk Me (DJASONs Acid Remake).mp3                                                             C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+ 04. Neuk Me (DJ.A.S.O.N's Acid Remake).mp3                                                        C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+ 
+ 05. It Doesn't Matter.mp3                                                                         C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+ 05. It Doesn't Matter Two.mp3                                                                     C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+ 
+ 06. Free.mp3                                                                                      C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+ 06. Flee.mp3                                                                                      C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+ 
+ song with no tags.mp3                                                                             C:\Users\causa\media-file-tools\tests\dummy_music\no-tags
+ 05. song with no tags.flac                                                                        C:\Users\causa\media-file-tools\tests\dummy_music\no-tags
+ 
+ song with no tags.mp3                                                                             C:\Users\causa\media-file-tools\tests\dummy_music\no-tags
+ fake artist - song with no tags.mp3                                                               C:\Users\causa\media-file-tools\tests\dummy_music\no-tags

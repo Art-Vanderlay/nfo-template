@@ -22,6 +22,15 @@ test 1 - title artist tag.wav,C:\Users\causa\media-file-tools\tests\dummy_music\
 title-artist-tag.wav,C:\Users\causa\media-file-tools\tests\dummy_music\title-artist-tag-match-wav
 copy of test 4 - title-artist-tag-match-flac.flac,C:\Users\causa\media-file-tools\tests\dummy_music
 ,
+01. Gypsy Woman - She's Homeless (La Da De La De Da) (Strip To The Bone Remix).mp3,C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+01. Gypsy Woman (She's Homeless) (La Da Dee La Da Da) (Strip To The Bone Edit).mp3,C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+,
+"03. Rhiannon - Live, 1976 Midnight Special.mp3",C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+03. Rhiannon (Live 1976 Midnight Special).mp3,C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+,
+04. Neuk Me (DJASONs Acid Remake).mp3,C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+04. Neuk Me (DJ.A.S.O.N's Acid Remake).mp3,C:\Users\causa\media-file-tools\tests\dummy_music\levanshtein-test-files
+,
 song with no tags.mp3,C:\Users\causa\media-file-tools\tests\dummy_music\no-tags
 05. song with no tags.flac,C:\Users\causa\media-file-tools\tests\dummy_music\no-tags
 ,

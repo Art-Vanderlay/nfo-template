@@ -1,4 +1,5 @@
 import os
+import Levenshtein
 from tabulate import tabulate
 
 
@@ -68,3 +69,11 @@ def is_file(filepath):
         parent_dir = os.path.dirname(filepath)
         return os.path.isdir(parent_dir)
     return False
+
+
+def normalize_ld(seq1, seq2):
+    # Scale levenshtein distance according to sequence length.
+    # Default max distance = 0.08
+    lev_distance = Levenshtein.distance(seq1, seq2)
+    max_distance = len(seq1) + len(seq2)
+    return lev_distance / max_distance

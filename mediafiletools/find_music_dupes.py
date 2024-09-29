@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 from tinytag import TinyTag
-from .common import MUSIC_FORMAT, save_to_file
+from .common import MUSIC_FORMAT, save_to_file, normalize_ld
 
 
 class Song:
@@ -57,7 +57,8 @@ FORMAT_POINTS = 2
 THRESHOLD = 16
 
 
-def find_music_dupes(dir_path, filter=None, filepath=None, output_type='csv'):
+def find_music_dupes(dir_path, filter=None, filepath=None,
+                     output_type='csv', distance=None):
     """
     Compares every file in the list returned from `get_songs()`
     and finds duplicate audio files. Matches are calculated by
@@ -85,14 +86,21 @@ def find_music_dupes(dir_path, filter=None, filepath=None, output_type='csv'):
     output_type: str, default `csv`
         Choose the resulting filetype/output. Valid types are `txt`,
         `csv`, `console`.
+    distance: float, optional
+        The strictness of the levenshtein function to find matches
+        in song or artist names. A higher distance allows more leeway
+        for differences in spelling and grammar and would match more files.
     """
     if filepath is None:
         filepath = os.path.expanduser('~')
+    if distance is None:
+        distance = 0.08
 
     matched = False
     music_list = get_songs(dir_path)
     matched_songs = []
     group = []
+
     # loop through each song
     for current_song in range(len(music_list)):
         for next_song in range(current_song + 1, len(music_list)):
@@ -100,7 +108,7 @@ def find_music_dupes(dir_path, filter=None, filepath=None, output_type='csv'):
             nxt_song = music_list[next_song]
 
             # Compare song's tags to find a match.
-            _calculate_score(cur_song, nxt_song)
+            _calculate_score(cur_song, nxt_song, distance=distance)
 
             # If songs score reach a threshold, the songs match.
             if cur_song.score >= THRESHOLD:
@@ -123,7 +131,7 @@ def find_music_dupes(dir_path, filter=None, filepath=None, output_type='csv'):
                       output_type=output_type)
 
 
-def _calculate_score(cur_song, nxt_song):
+def _calculate_score(cur_song, nxt_song, distance=None):
     """
     The method by which matches are calculated. Song titles
     and artists are given the highest scores followed by
@@ -133,13 +141,20 @@ def _calculate_score(cur_song, nxt_song):
             nxt_song.tag.title,
             cur_song.tag.artist,
             nxt_song.tag.artist)
-    if not any(tag is None or tag.strip() == '' for tag in tags):
 
+    # If tags exist in the file
+    if not any(tag is None or tag.strip() == '' for tag in tags):
         if not cur_song.matched:
-            if cur_song.tag.title.lower() == nxt_song.tag.title.lower():
+            if _check_name_match(cur_song.tag.title,
+                                 nxt_song.tag.title,
+                                 distance=distance):
                 cur_song.score += TITLE_POINTS
-            if _check_artist_match(cur_song.tag.artist, nxt_song.tag.artist):
+
+            if _check_artist_match(cur_song.tag.artist,
+                                   nxt_song.tag.artist,
+                                   distance=distance):
                 cur_song.score += ARTIST_POINTS
+
             if cur_song.format == nxt_song.format:
                 cur_song.score += FORMAT_POINTS
             if cur_song.tag.bitrate == nxt_song.tag.bitrate:
@@ -170,18 +185,27 @@ def _mark_matched_songs(song1, song2, group):
     song1.score = 0
 
 
-def _check_artist_match(artist1, artist2):
+def _check_name_match(name1, name2, distance=None):
+    # Use levenshtein function if distance is set higher than 0
+    # to account for minor misspellings of artist and song names.
+    if distance > 0.0:
+        if normalize_ld(name1, name2) <= distance:
+            return True
+    else:
+        if name1 == name2:
+            return True
+    return False
+
+
+def _check_artist_match(artist1, artist2, distance=None):
+    # TODO add score based on multiple artist matches.
     # Split both artist strings into lists of individual artist names
     artists_list1 = artist1.split('/')
     artists_list2 = artist2.split('/')
     # Check if any artist in list 1 is in list 2 or vice versa
-    for artist in artists_list1:
-        if artist.strip() in artists_list2:
-            return True
-    for artist in artists_list2:
-        if artist.strip() in artists_list1:
-            return True
-    return False
+    for a1 in artists_list1:
+        for a2 in artists_list2:
+            return _check_name_match(a1, a2, distance=distance)
 
 
 def _create_dataframe(data, filter=None, filepath=None, output_type=None):
@@ -233,7 +257,7 @@ def _create_dataframe(data, filter=None, filepath=None, output_type=None):
 
         f_name = f"{filter} Dupes"
     if output_type != 'console':
-        print(f"CSV file located in: "
+        print(f"\n{output_type} file located in: "
               f"{os.path.join(filepath, f_name)}.{output_type}")
 
     save_to_file(

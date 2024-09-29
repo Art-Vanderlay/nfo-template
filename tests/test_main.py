@@ -1,10 +1,13 @@
-import pandas as pd
+import ast
 import os
-import pytest
 import shutil
+
+import pandas as pd
+import pytest
 from mediafiletools.series_details import make_seriesdb, rename_episodes
 from mediafiletools.movie_sort_to_df import make_moviedb
 from mediafiletools.find_music_dupes import find_music_dupes
+from mediafiletools.common import normalize_ld
 
 
 @pytest.fixture
@@ -342,11 +345,14 @@ def expected_dupe_files_dir(tmp_path):
         'expected_default.csv',
         'expected_default.txt',
         'expected_flac.txt',
+        'expected_high_ld.txt',
+        'expected_low_ld.txt',
         'expected_flac.csv',
         'expected_mp3.txt',
         'expected_mp3.csv',
         'expected_wav.txt',
         'expected_wav.csv',
+        'levenshtein-test-data.txt',
     ]
 
     for fname in expected_dupe_files:
@@ -370,12 +376,6 @@ def test_music_dupe_default(request, expected_dupe_files_dir):
     find_music_dupes(musicdir,
                      filepath=str(actual_default_txt),
                      output_type='txt')
-
-    compare_and_test_all(actual_default_csv,
-                         expected_dupe_files_dir,
-                         "expected_default.csv",
-                         actual_default_txt,
-                         expected_default_txt)
 
     compare_and_test_all(actual_default_csv,
                          expected_dupe_files_dir,
@@ -457,3 +457,54 @@ def test_music_dupe_flac(request, expected_dupe_files_dir):
                          "expected_flac.csv",
                          actual_flac_txt,
                          expected_flac_txt)
+
+
+def test_levenshtein(expected_dupe_files_dir):
+    # Test that the levenshtein distance algorithm works correctly.
+    lev_test_data = expected_dupe_files_dir / "levenshtein-test-data.txt"
+
+    expected_ld = [0.06, 0.11, 0.08, 0.35, 0.05, 0.23,
+                   0.08, 0.11, 0.12, 0.15, 0.17, ]
+    count = 0
+    with open(lev_test_data, 'r') as file:
+        content = file.read()
+        data = ast.literal_eval(content.strip())
+        for group in data:
+            for title in range(len(group) - 1):
+                orig_title = group[0]
+                next_title = group[title + 1]
+                ld = str(expected_ld[count])
+                assert f"{normalize_ld(orig_title, next_title):.2f}" == ld
+                count += 1
+
+
+def test_distance_param(request, expected_dupe_files_dir):
+    # Test the results using both high and low distance values
+    # in the optional `distance` parameter.
+    actual_dupe_dir, musicdir = path_to_test_module(request,
+                                                    'actual_dupe_files',
+                                                    'dummy_music')
+
+    actual_high_ld = os.path.join(actual_dupe_dir, "actual_high_ld.txt")
+    actual_low_ld = os.path.join(actual_dupe_dir, "actual_low_ld.txt")
+
+    expected_high_ld = expected_dupe_files_dir / "expected_high_ld.txt"
+
+    expected_low_ld = expected_dupe_files_dir / "expected_low_ld.txt"
+
+    find_music_dupes(musicdir,
+                     filepath=str(actual_high_ld),
+                     distance=0.15,
+                     output_type='txt')
+    find_music_dupes(musicdir,
+                     distance=0.06,
+                     filepath=str(actual_low_ld),
+                     output_type='txt')
+
+    actual_high = normalize_newlines(actual_high_ld)
+    actual_low = normalize_newlines(actual_low_ld)
+    expected_high = normalize_newlines(expected_high_ld)
+    expected_low = normalize_newlines(expected_low_ld)
+
+    assert actual_high == expected_high
+    assert actual_low == expected_low
