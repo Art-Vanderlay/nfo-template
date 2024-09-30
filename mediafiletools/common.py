@@ -54,6 +54,17 @@ def save_to_file(df, filepath=None, output_type=None, fname=None):
         )
 
 
+def _print_file_loc(output_type, filepath, f_name):
+    # Prints file location to console.
+    if output_type != 'console':
+        msg = f"\n{output_type} file located in: "
+        if filepath.endswith((".csv", ".txt")):
+            fpath = filepath
+        else:
+            fpath = f"{os.path.join(filepath, f_name)}.{output_type}"
+        print(msg + fpath)
+
+
 def _tabulate_df(df):
     table_str = tabulate(df, headers='keys', tablefmt='plain', stralign='left',
                          numalign='left', showindex=False)

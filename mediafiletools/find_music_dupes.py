@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 from tinytag import TinyTag
-from .common import MUSIC_FORMAT, save_to_file, normalize_ld
+from .common import MUSIC_FORMAT, save_to_file, normalize_ld, _print_file_loc
 
 
 class Song:
@@ -256,9 +256,8 @@ def _create_dataframe(data, filter=None, filepath=None, output_type=None):
                 [_fill_df(song, rows) for song in matches]
 
         f_name = f"{filter} Dupes"
-    if output_type != 'console':
-        print(f"\n{output_type} file located in: "
-              f"{os.path.join(filepath, f_name)}.{output_type}")
+    # Output file location to console.
+    _print_file_loc(output_type, filepath, f_name)
 
     save_to_file(
         pd.DataFrame(rows, columns=["Song", "File Location"]),

@@ -7,7 +7,7 @@ import pytest
 from mediafiletools.series_details import make_seriesdb, rename_episodes
 from mediafiletools.movie_sort_to_df import make_moviedb
 from mediafiletools.find_music_dupes import find_music_dupes
-from mediafiletools.common import normalize_ld
+from mediafiletools.common import normalize_ld, _print_file_loc
 
 
 @pytest.fixture
@@ -508,3 +508,25 @@ def test_distance_param(request, expected_dupe_files_dir):
 
     assert actual_high == expected_high
     assert actual_low == expected_low
+
+
+def test_print_file_loc(capfd):
+    # CSV file
+    _print_file_loc('csv', r'\home\user', 'example')
+    loc_print = capfd.readouterr()
+    assert loc_print.out == f"\ncsv file located in: \\home\\user\\example.csv\n"
+
+    # Text file
+    _print_file_loc('txt', r'\home\user', 'example')
+    loc_print = capfd.readouterr()
+    assert loc_print.out == f"\ntxt file located in: \\home\\user\\example.txt\n"
+
+    # CSV with filename
+    _print_file_loc('csv', r'\home\user\filename.csv', 'example')
+    loc_print = capfd.readouterr()
+    assert loc_print.out == f"\ncsv file located in: \\home\\user\\filename.csv\n"
+
+    # Text with filename
+    _print_file_loc('txt', r'\home\user\filename.txt', 'example')
+    loc_print = capfd.readouterr()
+    assert loc_print.out == f"\ntxt file located in: \\home\\user\\filename.txt\n"

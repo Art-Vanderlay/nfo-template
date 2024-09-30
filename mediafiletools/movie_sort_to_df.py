@@ -3,7 +3,7 @@ import re
 from string import ascii_uppercase
 
 import pandas as pd
-from .common import save_to_file, EXTENSIONS
+from .common import save_to_file, EXTENSIONS, _print_file_loc
 
 
 def make_moviedb(dir_path, filepath=None, sort_type="abc",
@@ -171,11 +171,16 @@ def _create_abc_df(data, filepath=None, output_type=None):
                     first = False
                 else:
                     rows.append(("", m))
+
+    f_name = "Movie Database A - Z"
+    # Output file location to console.
+    _print_file_loc(output_type, filepath, f_name)
+
     save_to_file(
         pd.DataFrame(rows, columns=["A - Z", "Movie"]),
         filepath=filepath,
         output_type=output_type,
-        fname="Movie Database A - Z",
+        fname=f_name,
     )
 
 
@@ -208,9 +213,14 @@ def _create_folder_df(data, filepath=None, output_type=None, strip=False):
                 first = False
             else:
                 rows.append(("", m))
+
+    f_name = "Movie Database"
+    # Output file location to console.
+    _print_file_loc(output_type, filepath, f_name)
+
     save_to_file(
         pd.DataFrame(rows, columns=["Series", "Movie"]),
         filepath=filepath,
         output_type=output_type,
-        fname="Movie Database",
+        fname=f_name,
     )

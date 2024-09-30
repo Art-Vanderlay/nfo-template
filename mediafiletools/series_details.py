@@ -5,7 +5,7 @@ import re
 from bs4 import BeautifulSoup
 from requests import get
 import pandas as pd
-from .common import save_to_file, EXTENSIONS
+from .common import save_to_file, EXTENSIONS, _print_file_loc
 
 
 # Keep log of results of `rename_episodes`.
@@ -91,6 +91,11 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
             if from_write_ep:
                 # Return episodelist to `rename_episodes()`
                 return episodelist
+
+            f_name = soup.find('h2').text.strip()
+            # Output file location to console.
+            _print_file_loc(output_type, filepath, f_name)
+
             # Output a DataFrame to a txt/csv file or print to console.
             save_to_file(
                 pd.DataFrame(
@@ -105,7 +110,7 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
                 ),
                 filepath=filepath,
                 output_type=output_type,
-                fname=soup.find('h2').text.strip(),
+                fname=f_name,
             )
             break
 
