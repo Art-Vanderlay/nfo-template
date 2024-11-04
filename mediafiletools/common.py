@@ -1,4 +1,5 @@
 import os
+import re
 import Levenshtein
 from tabulate import tabulate
 
@@ -88,3 +89,9 @@ def normalize_ld(seq1, seq2):
     lev_distance = Levenshtein.distance(seq1, seq2)
     max_distance = len(seq1) + len(seq2)
     return lev_distance / max_distance
+
+
+def clean_filename(f_name):
+    # Remove special characters that can cause issues
+    # with file creation.
+    return re.sub(r'[^A-Za-z0-9 ]+', '-', f_name)

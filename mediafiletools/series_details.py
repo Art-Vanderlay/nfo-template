@@ -5,7 +5,7 @@ import re
 from bs4 import BeautifulSoup
 from requests import get
 import pandas as pd
-from .common import save_to_file, EXTENSIONS, _print_file_loc
+from .common import save_to_file, EXTENSIONS, _print_file_loc, clean_filename
 
 
 # Keep log of results of `rename_episodes`.
@@ -78,7 +78,7 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
             )
         else:
             soup = BeautifulSoup(response.text, "html.parser")
-            episode_details = soup.find_all("section", class_=re.compile("sc-e55007c4-0.*"))
+            episode_details = soup.find_all("div", class_=re.compile("sc-ccd6e31b-4.*"))
 
             # End loop after reaching final season.
             end_loop = _reach_end_of_season(episode_details, start, end)
@@ -92,7 +92,7 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
                 # Return episodelist to `rename_episodes()`
                 return episodelist
 
-            f_name = soup.find('h2').text.strip()
+            f_name = clean_filename(soup.find('h2').text.strip())
             # Output file location to console.
             _print_file_loc(output_type, filepath, f_name)
 
@@ -128,10 +128,9 @@ def _reach_end_of_season(episode_details, start, end):
         return endloop
     else:  # Default setting to scrape all seasons.
         # Check that no further seasons exist on IMDB.
-        for ep in episode_details:
-            if ep.find("a", class_="ipc-title-link-wrapper") is None:
-                endloop = True
-            return endloop
+        if not episode_details:
+            endloop = True
+        return endloop
 
 
 def rename_episodes(root_folder_path, info=None, **kwargs):
@@ -254,19 +253,16 @@ def _extract_data(episode_details, episodelist,
     Helper function to extract the useful information from the IMDB tags.
     """
     for dump in episode_details:
-        for eps in dump:
-            title = eps.find_all("div", class_="ipc-title__text")
-            # Get episode number and title by default.
-            ep_str = re.search(r"\bE(\d+)\b", str(title)).group(1)
-            title_str = re.search(r">[^∙]*∙\s*(.*?)<", str(title)).group(1)
-            episode_data = [season, ep_str, title_str]
-            if not from_write_ep:
-                # If called explicitly, also get all details about episodes.
-                airdate = eps.find_all("span", class_=re.compile("sc-ccd6e31b-10.*"))
-                descr = eps.find_all("div", class_="ipc-html-content-inner-div")
-                airdate_str = re.search(
-                    r"\b\w{3}, \w{3} \d{1,2}, \d{4}\b", str(airdate)
-                ).group(0)
-                descr_str = re.search(r"<div.*?>(.*?)</div>", str(descr)).group(1)
-                episode_data.extend([airdate_str, descr_str])
-            episodelist.append(episode_data)
+        title = dump.find_all("div", class_="ipc-title__text")
+        # Get episode number and title by default.
+        ep_str = re.search(r"\bE(\d+)\b", str(title)).group(1)
+        title_str = re.search(r">[^∙]*∙\s*(.*?)<", str(title)).group(1)
+        episode_data = [season, ep_str, title_str]
+        if not from_write_ep:
+            # If called explicitly, also get all details about episodes.
+            airdate = dump.find('span', class_='sc-ccd6e31b-10')
+            date_text = airdate.get_text(strip=True) if airdate else None
+            descr = dump.find_all("div", class_='ipc-html-content-inner-div')
+            descr_str = re.search(r"<div.*?>(.*?)</div>", str(descr)).group(1)
+            episode_data.extend([date_text, descr_str])
+        episodelist.append(episode_data)

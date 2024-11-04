@@ -1,10 +1,13 @@
 import ast
 import os
 import shutil
+import re
 
 import pandas as pd
 import pytest
-from mediafiletools.series_details import make_seriesdb, rename_episodes
+
+from bs4 import BeautifulSoup
+from mediafiletools.series_details import make_seriesdb, rename_episodes, _extract_data
 from mediafiletools.movie_sort_to_df import make_moviedb
 from mediafiletools.find_music_dupes import find_music_dupes
 from mediafiletools.common import normalize_ld, _print_file_loc
@@ -19,6 +22,7 @@ def expected_files_dir(tmp_path):
     # Copy expected files to temporary directory
     expected_files = [
         'blank_episode_names.csv',
+        'episodeDetails.txt',
         'expected_abc_strip.csv',
         'expected_abc_strip.txt',
         'expected_abcsort.csv',
@@ -137,6 +141,28 @@ def test_get_episode_df_section(request, expected_files_dir):
                          "expected_ge_start_end.csv",
                          actual_ge_start_end_txt,
                          expected_ge_start_end_txt)
+
+
+def test_extract_data(expected_files_dir):
+    """
+    Test that the `_extract_data` function gets the correct data.
+    """
+    ep_test_data = expected_files_dir / "episodeDetails.txt"
+    with open(ep_test_data, 'r', encoding='utf-8') as file:
+        file_content = file.read()
+        print(file_content)
+    soup = BeautifulSoup(file_content, 'html.parser')
+    episode_details = soup.find_all("div", class_=re.compile("sc-ccd6e31b-4.*"))
+    episodelist = []
+    _extract_data(episode_details, episodelist, 1)
+    assert episodelist[0] == [1,
+                              '1',
+                              'Episode #1.1',
+                              'Tue, Sep 24, 2024',
+                              "Puzzle setter John 'Ludwig' Taylor's life is "
+                              "upended when his identical twin, DCI James Taylor, "
+                              "disappears. John reluctantly assumes his identity "
+                              "in order to track him down."]
 
 
 def path_to_test_module(request, actual_files_dir, mediadir):
