@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='media-file-tools',
-    version='1.1.1',
+    version='2.0.0',
     description='Organize your digital media files',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
@@ -26,6 +26,7 @@ setup(
         'beautifulsoup4>=4.12.3',
         'tabulate>=0.9.0',
         'tinytag>=1.10.1',
+        'Levenshtein>=0.23.0',
     ],
     test_suite='tests',
 )

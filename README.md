@@ -2,7 +2,7 @@
 
 ## Description
 
-Media File Tools is a Python package designed to automate some of the tedious tasks of organizing your video files. 
+Media File Tools is a Python package designed to automate some of the tedious tasks of organizing your media files. 
 
 ## Features
 
