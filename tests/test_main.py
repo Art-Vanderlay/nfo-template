@@ -150,9 +150,8 @@ def test_extract_data(expected_files_dir):
     ep_test_data = expected_files_dir / "episodeDetails.txt"
     with open(ep_test_data, 'r', encoding='utf-8') as file:
         file_content = file.read()
-        print(file_content)
     soup = BeautifulSoup(file_content, 'html.parser')
-    episode_details = soup.find_all("div", class_=re.compile("sc-ccd6e31b-4.*"))
+    episode_details = soup.find_all("section", class_=re.compile("sc-1e7f96be-0.*"))
     episodelist = []
     _extract_data(episode_details, episodelist, 1)
     assert episodelist[0] == [1,

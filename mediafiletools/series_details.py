@@ -18,7 +18,7 @@ logging.basicConfig(filename=log_file, level=logging.INFO,
 
 
 def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
-                  output_type="csv", from_write_ep=False):
+                  output_type="csv", from_write_ep=False, final=False):
     """
     Scrape the data of all the episodes in the given seasons and
     organize into a DataFrame. Default setting will scrape every
@@ -48,6 +48,9 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
     from_write_ep: bool, default False
         Flag to call `_extract_data()` and return DataFrame
         to `write_episode_names()` function.
+    final: bool, default False
+        If True, stops scraping after the final season of
+        a series has been reached.
     """
     if start is None:
         start = 1
@@ -78,10 +81,13 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
             )
         else:
             soup = BeautifulSoup(response.text, "html.parser")
-            episode_details = soup.find_all("div", class_=re.compile("sc-ccd6e31b-4.*"))
+            episode_details = soup.find_all("section", class_=re.compile("sc-56c21e9b-0.*"))
+            # Check for absense of 'Next Season' element in soup.
+            if not soup.find('button', {'id': 'next-season-btn'}):
+                final = True
 
             # End loop after reaching final season.
-            end_loop = _reach_end_of_season(episode_details, start, end)
+            end_loop = _reach_end_of_season(start, end, final=final)
             _extract_data(
                 episode_details, episodelist, season, from_write_ep=from_write_ep
             )
@@ -115,7 +121,7 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
             break
 
 
-def _reach_end_of_season(episode_details, start, end):
+def _reach_end_of_season(start, end, final=False):
     """
     Determine when the scraper has reached the final
     season and then stop searching.
@@ -128,7 +134,7 @@ def _reach_end_of_season(episode_details, start, end):
         return endloop
     else:  # Default setting to scrape all seasons.
         # Check that no further seasons exist on IMDB.
-        if not episode_details:
+        if final:
             endloop = True
         return endloop
 
@@ -253,16 +259,17 @@ def _extract_data(episode_details, episodelist,
     Helper function to extract the useful information from the IMDB tags.
     """
     for dump in episode_details:
-        title = dump.find_all("div", class_="ipc-title__text")
-        # Get episode number and title by default.
-        ep_str = re.search(r"\bE(\d+)\b", str(title)).group(1)
-        title_str = re.search(r">[^∙]*∙\s*(.*?)<", str(title)).group(1)
-        episode_data = [season, ep_str, title_str]
-        if not from_write_ep:
-            # If called explicitly, also get all details about episodes.
-            airdate = dump.find('span', class_='sc-ccd6e31b-10')
-            date_text = airdate.get_text(strip=True) if airdate else None
-            descr = dump.find_all("div", class_='ipc-html-content-inner-div')
-            descr_str = re.search(r"<div.*?>(.*?)</div>", str(descr)).group(1)
-            episode_data.extend([date_text, descr_str])
-        episodelist.append(episode_data)
+        for eps in dump:
+            title = eps.find_all("div", class_="ipc-title__text")
+            # Get episode number and title by default.
+            ep_str = re.search(r"\bE(\d+)\b", str(title)).group(1)
+            title_str = re.search(r">[^∙]*∙\s*(.*?)<", str(title)).group(1)
+            episode_data = [season, ep_str, title_str]
+            if not from_write_ep:
+                # If called explicitly, also get all details about episodes.
+                airdate = eps.find('span', class_='sc-f2169d65-10')
+                date_text = airdate.get_text(strip=True) if airdate else None
+                descr = eps.find_all("div", class_='ipc-html-content-inner-div')
+                descr_str = re.search(r"<div.*?>(.*?)</div>", str(descr)).group(1)
+                episode_data.extend([date_text, descr_str])
+            episodelist.append(episode_data)
