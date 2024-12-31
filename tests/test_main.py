@@ -33,10 +33,17 @@ def expected_files_dir(tmp_path):
         'expected_folder_strip.txt',
         'expected_ge_default.csv',
         'expected_ge_default.txt',
+        'expected_ge_default_tmdb.csv',
+        'expected_ge_default_tmdb.txt',
         'expected_ge_start_end.csv',
+        'expected_ge_start_end.csv',
+        'expected_ge_start_end_tmdb.csv',
+        'expected_ge_start_end_tmdb.txt',
         'expected_ge_start_end.txt',
         'expected_list_default.txt',
-        'expected_list_with_info.txt'
+        'expected_list_default_tmdb.txt',
+        'expected_list_with_info.txt',
+        'expected_list_with_info_tmdb.txt'
     ]
 
     for fname in expected_files:
@@ -71,7 +78,7 @@ def compare_and_test_all(actual_ge_default_csv,
     assert actual_txt_content == expected_txt_content
 
 
-def test_get_episode_df(request, expected_files_dir):
+def test_get_episode_df_imdb(request, expected_files_dir):
     """
     Test `get_episodes(imdb_id, filepath, output type='csv')`
     and `get_episodes(imdb_id, start=1, end=2, filepath, output type='txt')`
@@ -91,12 +98,13 @@ def test_get_episode_df(request, expected_files_dir):
     expected_ge_default_txt = expected_files_dir / "expected_ge_default.txt"
 
     # Create csv file to test.
-    make_seriesdb("tt1220617",
-                  filepath=str(actual_ge_default_csv))
-    # Create txt file to test.
-    make_seriesdb("tt1220617",
-                  filepath=str(actual_ge_default_txt),
-                  output_type="txt")
+    with pytest.deprecated_call():
+        make_seriesdb("tt1220617",
+                      filepath=str(actual_ge_default_csv))
+        # Create txt file to test.
+        make_seriesdb("tt1220617",
+                      filepath=str(actual_ge_default_txt),
+                      output_type="txt")
 
     compare_and_test_all(actual_ge_default_csv,
                          expected_files_dir,
@@ -105,7 +113,7 @@ def test_get_episode_df(request, expected_files_dir):
                          expected_ge_default_txt)
 
 
-def test_get_episode_df_section(request, expected_files_dir):
+def test_get_episode_df_section_imdb(request, expected_files_dir):
     """
     Test `get_episodes(imdb_id, start=1, end=2, filepath, output type='csv')`
     and `get_episodes(imdb_id, start=1, end=2, filepath, output type='txt')`
@@ -125,16 +133,17 @@ def test_get_episode_df_section(request, expected_files_dir):
     expected_ge_start_end_txt = expected_files_dir / "expected_ge_start_end.txt"
 
     # Create csv file to test.
-    make_seriesdb("tt1220617",
-                  start=1,
-                  end=2,
-                  filepath=str(actual_ge_start_end_csv))
-    # Create txt file to test.
-    make_seriesdb("tt1220617",
-                  start=1,
-                  end=2,
-                  filepath=str(actual_ge_start_end_txt),
-                  output_type="txt")
+    with pytest.deprecated_call():
+        make_seriesdb("tt1220617",
+                      start=1,
+                      end=2,
+                      filepath=str(actual_ge_start_end_csv))
+        # Create txt file to test.
+        make_seriesdb("tt1220617",
+                      start=1,
+                      end=2,
+                      filepath=str(actual_ge_start_end_txt),
+                      output_type="txt")
 
     compare_and_test_all(actual_ge_start_end_csv,
                          expected_files_dir,
@@ -176,7 +185,7 @@ def path_to_test_module(request, actual_files_dir, mediadir):
     return actual_files_dir, media_dir
 
 
-def test_write_episode_names(request, expected_files_dir):
+def test_write_episode_names_imdb(request, expected_files_dir):
     actual_files_dir, episodes_dir = path_to_test_module(request,
                                                          'actual_files',
                                                          'dummy_episodes')
@@ -215,7 +224,7 @@ def test_write_episode_names(request, expected_files_dir):
     rename_episodes(episodes_dir, csv_path=blank_csv_file_path)
 
 
-def test_write_episode_names_from_imdb(request, expected_files_dir):
+def test_write_episode_names_directly_imdb(request, expected_files_dir):
     actual_files_dir, episodes_dir = path_to_test_module(request,
                                                          'actual_files',
                                                          'dummy_episodes')
@@ -237,7 +246,186 @@ def test_write_episode_names_from_imdb(request, expected_files_dir):
         expected_names.append(season)  # Append the last season if not empty
 
     # Change file names to
-    rename_episodes(episodes_dir, imdb_id="tt1220617", info="some info")
+    with pytest.deprecated_call():
+        rename_episodes(episodes_dir, imdb_id="tt1220617", info="some info")
+
+    # Compare filenames
+    for index, directory in enumerate(os.listdir(episodes_dir)):
+        dir_path = os.path.join(episodes_dir, directory)
+        actual_filenames = os.listdir(dir_path)
+        assert sorted(actual_filenames) == sorted(expected_names)[index]
+
+    # Reset the filenames.
+    blank_csv_file_path = os.path.join(expected_files_dir,
+                                       "blank_episode_names.csv")
+    rename_episodes(episodes_dir, csv_path=blank_csv_file_path)
+
+
+def test_get_episode_df_tmdb(request, expected_files_dir):
+    """
+    Test `get_episodes()` with the `series`, `series_id` and
+    `year` parameters.
+    There should be no diff in the output csv or text files.
+    """
+    # Get the path to the current test module
+    test_dir = os.path.dirname(request.module.__file__)
+    actual_files_dir = os.path.join(test_dir, 'actual_files')
+
+    # Ensure the 'actual_files' directory exists
+    os.makedirs(actual_files_dir, exist_ok=True)
+
+    actual_ge_default_csv = os.path.join(actual_files_dir,
+                                         "actual_ge_default_tmdb.csv")
+    actual_ge_default_txt = os.path.join(actual_files_dir,
+                                         "actual_ge_default_tmdb.txt")
+    expected_ge_default_txt = expected_files_dir / "expected_ge_default_tmdb.txt"
+
+    # Create csv file to test.
+    make_seriesdb(series_id="7317",
+                  filepath=str(actual_ge_default_csv))
+    # Create txt file to test.
+    make_seriesdb(series_id="7317",
+                  filepath=str(actual_ge_default_txt),
+                  output_type="txt")
+
+    compare_and_test_all(actual_ge_default_csv,
+                         expected_files_dir,
+                         "expected_ge_default_tmdb.csv",
+                         actual_ge_default_txt,
+                         expected_ge_default_txt)
+
+    # Test the `series` and `year` keywords.
+    make_seriesdb(series="The Inbetweeners", year="2008",
+                  filepath=str(actual_ge_default_csv))
+    make_seriesdb(series="The Inbetweeners", year="2008",
+                  filepath=str(actual_ge_default_txt),
+                  output_type="txt")
+
+    compare_and_test_all(actual_ge_default_csv,
+                         expected_files_dir,
+                         "expected_ge_default_tmdb.csv",
+                         actual_ge_default_txt,
+                         expected_ge_default_txt)
+
+
+def test_get_episode_df_section_tmdb(request, expected_files_dir):
+    """
+    Same as `test_get_episode_df_tmdb` but also testing the
+    `start` and `end` parameters.
+    """
+    # Get the path to the current test module
+    test_dir = os.path.dirname(request.module.__file__)
+    actual_files_dir = os.path.join(test_dir, 'actual_files')
+
+    # Ensure the 'actual_files' directory exists
+    os.makedirs(actual_files_dir, exist_ok=True)
+
+    actual_ge_start_end_csv = os.path.join(actual_files_dir,
+                                           "actual_ge_start_end_tmdb.csv")
+    actual_ge_start_end_txt = os.path.join(actual_files_dir,
+                                           "actual_ge_start_end_tmdb.txt")
+    expected_ge_start_end_txt = expected_files_dir / "expected_ge_start_end_tmdb.txt"
+
+    # Create csv file to test.
+    make_seriesdb(series_id="1400",
+                  start=2,
+                  end=5,
+                  filepath=str(actual_ge_start_end_csv))
+    # Create txt file to test.
+    make_seriesdb(series_id="1400",
+                  start=2,
+                  end=5,
+                  filepath=str(actual_ge_start_end_txt),
+                  output_type="txt")
+
+    compare_and_test_all(actual_ge_start_end_csv,
+                         expected_files_dir,
+                         "expected_ge_start_end_tmdb.csv",
+                         actual_ge_start_end_txt,
+                         expected_ge_start_end_txt)
+
+    # Test the `series` and `year` keywords.
+    make_seriesdb(series="Seinfeld",
+                  year="1989",
+                  start=2,
+                  end=5,
+                  filepath=str(actual_ge_start_end_csv))
+    make_seriesdb(series="Seinfeld",
+                  year="1989",
+                  start=2,
+                  end=5,
+                  filepath=str(actual_ge_start_end_txt),
+                  output_type="txt")
+
+    compare_and_test_all(actual_ge_start_end_csv,
+                         expected_files_dir,
+                         "expected_ge_start_end_tmdb.csv",
+                         actual_ge_start_end_txt,
+                         expected_ge_start_end_txt)
+
+
+def test_write_episode_names_tmdb(request, expected_files_dir):
+    actual_files_dir, episodes_dir = path_to_test_module(request,
+                                                         'actual_files',
+                                                         'dummy_episodes')
+
+    # The names to write to the episodes.
+    csv_filepath = os.path.join(expected_files_dir, "expected_ge_default_tmdb.csv")
+
+    with open(os.path.join(expected_files_dir,
+                           "expected_list_default_tmdb.txt"), 'r') as file:
+        lines = file.read().splitlines()
+
+    expected_names = []
+    season = []
+    for line in lines:
+        if line.strip() == "":
+            if season:
+                expected_names.append(season)
+                season = []
+        else:
+            season.append(line.strip())
+    if season:
+        expected_names.append(season)  # Append the last season if not empty
+
+    # Change file names to
+    rename_episodes(episodes_dir, csv_path=csv_filepath)
+
+    # Compare filenames
+    for index, directory in enumerate(os.listdir(episodes_dir)):
+        dir_path = os.path.join(episodes_dir, directory)
+        actual_filenames = os.listdir(dir_path)
+        assert sorted(actual_filenames) == sorted(expected_names)[index]
+
+    # Reset the filenames.
+    blank_csv_file_path = os.path.join(expected_files_dir,
+                                       "blank_episode_names.csv")
+    rename_episodes(episodes_dir, csv_path=blank_csv_file_path)
+
+
+def test_write_episode_names_directly_tmdb(request, expected_files_dir):
+    actual_files_dir, episodes_dir = path_to_test_module(request,
+                                                         'actual_files',
+                                                         'dummy_episodes')
+
+    with open(os.path.join(expected_files_dir,
+                           "expected_list_with_info_tmdb.txt"), 'r') as file:
+        lines = file.read().splitlines()
+
+    expected_names = []
+    season = []
+    for line in lines:
+        if line.strip() == "":
+            if season:
+                expected_names.append(season)
+                season = []
+        else:
+            season.append(line.strip())
+    if season:
+        expected_names.append(season)  # Append the last season if not empty
+
+    # Change file names to
+    rename_episodes(episodes_dir, series_id="7317", info="some info")
 
     # Compare filenames
     for index, directory in enumerate(os.listdir(episodes_dir)):
@@ -539,19 +727,19 @@ def test_print_file_loc(capfd):
     # CSV file
     _print_file_loc('csv', r'\home\user', 'example')
     loc_print = capfd.readouterr()
-    assert loc_print.out == f"\ncsv file located in: \\home\\user\\example.csv\n"
+    assert loc_print.out == "\ncsv file located in: \\home\\user\\example.csv\n"
 
     # Text file
     _print_file_loc('txt', r'\home\user', 'example')
     loc_print = capfd.readouterr()
-    assert loc_print.out == f"\ntxt file located in: \\home\\user\\example.txt\n"
+    assert loc_print.out == "\ntxt file located in: \\home\\user\\example.txt\n"
 
     # CSV with filename
     _print_file_loc('csv', r'\home\user\filename.csv', 'example')
     loc_print = capfd.readouterr()
-    assert loc_print.out == f"\ncsv file located in: \\home\\user\\filename.csv\n"
+    assert loc_print.out == "\ncsv file located in: \\home\\user\\filename.csv\n"
 
     # Text with filename
     _print_file_loc('txt', r'\home\user\filename.txt', 'example')
     loc_print = capfd.readouterr()
-    assert loc_print.out == f"\ntxt file located in: \\home\\user\\filename.txt\n"
+    assert loc_print.out == "\ntxt file located in: \\home\\user\\filename.txt\n"

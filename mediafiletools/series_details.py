@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import warnings
 
 from bs4 import BeautifulSoup
 from requests import get
@@ -17,8 +18,10 @@ logging.basicConfig(filename=log_file, level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
-                  output_type="csv", from_write_ep=False, final=False):
+def make_seriesdb(imdb_id=None, series_id=None, series=None,
+                  year=None, start=None, end=None, filepath=None,
+                  output_type="csv", from_write_ep=False,
+                  final=False):
     """
     Scrape the data of all the episodes in the given seasons and
     organize into a DataFrame. Default setting will scrape every
@@ -28,13 +31,30 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
 
     Example:
         1) make_seriesdb('tt0264235')
-        2) make_seriesdb('tt0058805', start=1, end=3,
+        2) make_seriesdb(series_id='7317', start=1, end=3,
                          filepath='home/user/shows', output_type='txt')
+        3) make_seriesdb(series='Seinfeld', year='1989')
+
 
     Parameters
     ----------
     imdb_id: str
         The IMDB id of the show (e.g. 'tt0903747')
+    series_id: str
+        The MovieDatabase id of the show (e.g. '7317')
+
+        .. versionadded:: 2.0.1
+
+    series: str
+        The name of the TV series.
+
+        .. versionadded:: 2.0.1
+
+    year: str, optional
+        The year that the series premiered.
+
+        .. versionadded:: 2.0.1
+
     start: int
         The season to start scraping from.
     end: int
@@ -56,10 +76,29 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
         start = 1
     if filepath is None:
         filepath = os.path.expanduser('~')
+    name_parsed = False
+    season_url = None
 
     episodelist = []
     while True:
-        season_url = rf"https://www.imdb.com/title/{imdb_id}/episodes/?season={start}"
+        if imdb_id is not None:
+            season_url = rf"https://www.imdb.com/title/{imdb_id}/episodes/?season={start}"
+            warnings.warn(
+                "The `imdb_id` parameter is deprecated and will be removed in "
+                "version 2.0.3. Please use `series_id` instead, using the id "
+                "from themoviedb.org.",
+                DeprecationWarning,
+                stacklevel=2
+            )
+        elif series_id is not None:
+            season_url = rf"https://www.themoviedb.org/tv/{series_id}/season/{start}"
+        elif series is not None:
+            if season_url is not None:
+                season_url = season_url[:-1] + str(start)
+            else:
+                season_url = _parse_series_name(series_name=series, year=year,
+                                                start=start, url_created=name_parsed)
+
         season = int(start)
         response = get(
             season_url,
@@ -81,10 +120,18 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
             )
         else:
             soup = BeautifulSoup(response.text, "html.parser")
-            episode_details = soup.find_all("section", class_=re.compile("sc-56c21e9b-0.*"))
-            # Check for absense of 'Next Season' element in soup.
-            if not soup.find('button', {'id': 'next-season-btn'}):
-                final = True
+            name_parsed = True
+            if imdb_id is not None:
+                episode_details = soup.find_all("section",
+                                                class_=re.compile("sc-56c21e9b-0.*"))
+                # Check for absense of 'Next Season' element in soup in imdb.
+                if not soup.find('button', {'id': 'next-season-btn'}):
+                    final = True
+            else:
+                episode_details = soup.find_all('div', class_='card')
+                # Check for absense of 'Next Season' element in soup.
+                if not soup.find('a', {'alt': 'Next Season'}):
+                    final = True
 
             # End loop after reaching final season.
             end_loop = _reach_end_of_season(start, end, final=final)
@@ -98,7 +145,13 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
                 # Return episodelist to `rename_episodes()`
                 return episodelist
 
-            f_name = clean_filename(soup.find('h2').text.strip())
+            # Get show title for filename
+            f_name = None
+            if imdb_id is not None:
+                f_name = clean_filename(soup.find('h2').text.strip())
+            elif series_id is not None or series is not None:
+                f_name = soup.title.string.split(":")[0]
+
             # Output file location to console.
             _print_file_loc(output_type, filepath, f_name)
 
@@ -119,6 +172,62 @@ def make_seriesdb(imdb_id, start=None, end=None, filepath=None,
                 fname=f_name,
             )
             break
+
+
+def _parse_series_name(series_name, year=None, start=None,
+                       href=None, url_created=None):
+    # Converts the `series` string from `make_seriesdb` into a season url.
+    if url_created:
+        return rf"https://www.themoviedb.org{href}/season/{start}"
+    if year is not None:
+        year = '%20y%3A' + year
+    else:
+        year = ''
+    season_url = f"https://www.themoviedb.org/search?query=" \
+        f"{series_name.replace(' ', '%20')}{year}"
+    response = get(
+        season_url,
+        headers={
+             "User-Agent": "Mozilla/5.0",
+             "Accept": "application/json",
+             "Accept-Language": "en-US,en;q=0.5",
+             "Accept-Encoding": "gzip, deflate",
+             "Connection": "keep-alive",
+             "Referer": "http://example.com",
+             "Cache-Control": "no-cache",
+        },
+    )
+    if response.status_code != 200:
+        raise ValueError(
+            f"Error: Received HTTP status code {response.status_code} "
+            f"({response.reason}) for URL: {season_url}. Please check the URL "
+            f"or TMDB ID and try again."
+        )
+    else:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        results = soup.find_all('div', class_='poster')
+
+        if results:
+            name_list = []
+            matches = []
+            for index, result in enumerate(results):
+                show_title = result.find('img')
+                alt_text = show_title['alt'] if show_title else None
+                # Get unique url of each search result.
+                href = result.find('a', class_='result')['href']
+                name_list.append(alt_text)
+                # Filter out results that don't match the series name.
+                if show_title and alt_text == name_list[0]:
+                    matches.append((alt_text, href))
+
+            if len(matches) > 1:
+                raise ValueError(
+                    f"There are multiple results for {name_list[0]}. Please filter "
+                    f"your results by specifying the show by year or by TMDB ID. \n"
+                    f"{matches}"
+                )
+            else:
+                return rf"https://www.themoviedb.org{matches[0][1]}/season/{start}"
 
 
 def _reach_end_of_season(start, end, final=False):
@@ -170,6 +279,10 @@ def rename_episodes(root_folder_path, info=None, **kwargs):
             The IMDB id of the show (e.g. 'tt0903747'). If passed,
             will rename the episodes with the names scraped from
             IMDB.
+        - series_id: str, optional
+            The TMDB id of the show (e.g. '7317'). If passed,
+            will rename the episodes with the names scraped from
+            TMDB.
         - csv_path: str, optional
             The csv file containing the series data. If passed,
             will rename the episodes from the input csv file.
@@ -187,7 +300,8 @@ def rename_episodes(root_folder_path, info=None, **kwargs):
         if kwargs['csv_path'].endswith(".csv"):
             df = pd.read_csv(kwargs['csv_path'])
         else:
-            raise ValueError(f"{os.path.basename(kwargs['csv_path'])} must be a csv file.")
+            raise ValueError(f"{os.path.basename(kwargs['csv_path'])} "
+                             f"must be a csv file.")
         # Ensure the CSV file has the required columns.
         if not all(
             col in df.columns
@@ -195,15 +309,22 @@ def rename_episodes(root_folder_path, info=None, **kwargs):
         ):
             raise ValueError(
                 "CSV file columns do not match pattern 'Season', "
-                "'Episode Number', 'Title', 'Air date', 'Description'. Is it the correct file?"
+                "'Episode Number', 'Title', 'Air date', 'Description'. "
+                "Is it the correct file?"
             )
     elif 'imdb_id' in kwargs:
         df = pd.DataFrame(
             make_seriesdb(kwargs['imdb_id'], from_write_ep=True),
             columns=["Season", "Episode Number", "Title"],
         )
+    elif 'series_id' in kwargs:
+        df = pd.DataFrame(
+            make_seriesdb(series_id=kwargs['series_id'], from_write_ep=True),
+            columns=["Season", "Episode Number", "Title"],
+        )
     else:
-        raise ValueError("At least one of 'imdb_id' or 'csv_path' must be provided.")
+        raise ValueError("At least one of 'imdb_id', 'series_id', or 'csv_path' "
+                         "must be provided.")
 
     def _rename_files(file_name):
         # Helper function.
@@ -259,17 +380,33 @@ def _extract_data(episode_details, episodelist,
     Helper function to extract the useful information from the IMDB tags.
     """
     for dump in episode_details:
-        for eps in dump:
-            title = eps.find_all("div", class_="ipc-title__text")
-            # Get episode number and title by default.
-            ep_str = re.search(r"\bE(\d+)\b", str(title)).group(1)
-            title_str = re.search(r">[^∙]*∙\s*(.*?)<", str(title)).group(1)
-            episode_data = [season, ep_str, title_str]
+        if str(episode_details.source) == "div|{'class': 'card'}":
+            # Extract season and episode number from the <a> tag
+            episode_link = dump.find('a', class_='no_click open')
+            episode_number = episode_link['data-episode-number']
+            season_number = episode_link['data-season-number']
+            title = dump.find('h3').get_text(strip=True)
+            episode_data = [int(season_number), episode_number, title]
             if not from_write_ep:
                 # If called explicitly, also get all details about episodes.
-                airdate = eps.find('span', class_='sc-f2169d65-10')
-                date_text = airdate.get_text(strip=True) if airdate else None
-                descr = eps.find_all("div", class_='ipc-html-content-inner-div')
-                descr_str = re.search(r"<div.*?>(.*?)</div>", str(descr)).group(1)
-                episode_data.extend([date_text, descr_str])
+                descr = dump.find('p').get_text(strip=True)
+                date_span = dump.find('div', class_='date').find('span', class_='date')
+                date = date_span.get_text(strip=True) if date_span else "N/A"
+                episode_data.extend([date, descr])
             episodelist.append(episode_data)
+        else:
+            # If deprecated 'imdb_id' is used.
+            for eps in dump:
+                title = eps.find_all("div", class_="ipc-title__text")
+                # Get episode number and title by default.
+                ep_str = re.search(r"\bE(\d+)\b", str(title)).group(1)
+                title_str = re.search(r">[^∙]*∙\s*(.*?)<", str(title)).group(1)
+                episode_data = [season, ep_str, title_str]
+                if not from_write_ep:
+                    # If called explicitly, also get all details about episodes.
+                    airdate = eps.find('span', class_='sc-f2169d65-10')
+                    date_text = airdate.get_text(strip=True) if airdate else None
+                    descr = eps.find_all("div", class_='ipc-html-content-inner-div')
+                    descr_str = re.search(r"<div.*?>(.*?)</div>", str(descr)).group(1)
+                    episode_data.extend([date_text, descr_str])
+                episodelist.append(episode_data)
