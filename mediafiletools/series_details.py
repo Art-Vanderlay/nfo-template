@@ -48,12 +48,12 @@ def make_seriesdb(imdb_id=None, series_id=None, series=None,
     series: str
         The name of the TV series.
 
-        .. versionadded:: 2.0.1
+        .. versionadded:: 2.1.0
 
     year: str, optional
         The year that the series premiered.
 
-        .. versionadded:: 2.0.1
+        .. versionadded:: 2.1.0
 
     start: int
         The season to start scraping from.
