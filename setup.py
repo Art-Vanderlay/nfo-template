@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='media-file-tools',
-    version='2.0.0',
+    version='2.1.0',
     description='Organize your digital media files',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',

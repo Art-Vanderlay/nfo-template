@@ -10,7 +10,7 @@ Media File Tools is a Python package designed to automate some of the tedious ta
 - Create a TV show database with episode title, air date and plot summary.
 - Create a movies database organized alphabetically or by folder.
 - Find duplicate music files.
-- Uses BeautifulSoup4 and Cinemagoer to scrape data from IMDB.
+- Uses BeautifulSoup4 to scrape data from IMDB and TMDB.
 
 ## Installation
 
@@ -25,7 +25,15 @@ To create a csv file with the seasons, titles and plot summaries of a TV series:
 ```py
 from mediafiletools import make_seriesdb
 
+# Search using the name of the series (with optional `year` param for accuracy)
+make_seriesdb(series='seinfeld', year='1989')
+
+# Search using the IMDB ID of the show. 
 make_seriesdb(imdb_id='tt0098904')
+
+# Search using the TMDB (Movie Database) ID of the show
+make_seriesdb(series_id='1400')
+
 ```
 To overwrite the old file names of the show on your disc with the ones one the csv file:
 ```py
@@ -37,9 +45,13 @@ rename_episodes('C:\Users\user\Videos\Seinfeld', csv_path='C:\Users\user\episode
 > Any folders not following this naming convention will be skipped. The names of the files before and after they're 
 > renamed are recorded in a log.
 
-To get the episodes and write the file names in one command, pass the `imdb_id` as a keyword to `rename_episodes`:
+To get the episodes and write the file names in one command, pass the `imdb_id` or the `series_id` as a keyword to `rename_episodes`:
 ```py
+# Using the IMDB ID
 rename_episodes('C:\Users\user\Videos\Seinfeld', imdb_id='tt0098904')
+
+# Using the TMDB (Movie Database) ID
+rename_episodes('C:\Users\user\Videos\Seinfeld', series_id='1400')
 ```
 > Sometimes the episodes on IMDB are in a different order or have episode 0/unaired pilots 
 > not on a DVD or BlueRay. Make sure the episodes list lines up perfectly with the ones on your disc.

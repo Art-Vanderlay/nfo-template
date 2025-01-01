@@ -85,7 +85,7 @@ def make_seriesdb(imdb_id=None, series_id=None, series=None,
             season_url = rf"https://www.imdb.com/title/{imdb_id}/episodes/?season={start}"
             warnings.warn(
                 "The `imdb_id` parameter is deprecated and will be removed in "
-                "version 2.0.3. Please use `series_id` instead, using the id "
+                "version 2.1.3. Please use `series_id` instead, using the id "
                 "from themoviedb.org.",
                 DeprecationWarning,
                 stacklevel=2

@@ -5,6 +5,7 @@ __all__ = [
     "_create_abc_df",
     "_create_folder_df",
     "make_seriesdb",
+    "_parse_series_name",
     "_reach_end_of_season",
     "rename_episodes",
     "_extract_data",
@@ -28,6 +29,7 @@ from mediafiletools.movie_sort_to_df import (
 )
 from mediafiletools.series_details import (
     make_seriesdb,
+    _parse_series_name,
     _reach_end_of_season,
     rename_episodes,
     _extract_data,
